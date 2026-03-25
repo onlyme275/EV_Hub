@@ -12,7 +12,7 @@ class User(AbstractUser):
     )
 
     email = models.EmailField(max_length=50, unique=True)
-    role = models.CharField(max_length=1, choices=ROLE_CHOICE, default='P')
+    role = models.CharField(max_length=1, choices=ROLE_CHOICE, default='A')
 
     qr_code = models.ImageField(upload_to="qr_codes/", blank=True, null=True)
 
@@ -23,10 +23,11 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
         super().save(*args, **kwargs)
 
         # Generate QR only if not exists
-        if not self.qr_code:
+        if is_new and not self.qr_code:
             data = f"ID:{self.id},Email:{self.email},Role:{self.role}"
 
             qr = qrcode.make(data)
@@ -36,9 +37,10 @@ class User(AbstractUser):
 
             file_name = f"user_{self.id}.png"
             self.qr_code.save(file_name, File(buffer), save=False)
-
-        super().save(*args, **kwargs)
+            
+            # Save only the qr_code field to avoid duplicate insert errors
+            # and to be more efficient.
+            super().save(update_fields=['qr_code'])
 
     def __str__(self):
         return self.username if self.username else self.email
-        

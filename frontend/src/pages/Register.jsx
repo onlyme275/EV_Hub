@@ -33,17 +33,6 @@ export default function Register() {
     dispatch(registerUser(form));
   };
 
-  /* ================= REDIRECT AFTER REGISTER ================= */
-  useEffect(() => {
-    if (success && user) {
-      // redirect based on role
-      if (user.role === "A") navigate("/admin");
-      if (user.role === "P") navigate("/passenger");
-      if (user.role === "D") navigate("/driver");
-    }
-  }, [success, user, navigate]);
-
-  /* ================= CLEAR STATE ON UNMOUNT ================= */
   useEffect(() => {
     return () => {
       dispatch(resetAuthState());
@@ -131,7 +120,6 @@ export default function Register() {
             >
               <option value="P">Passenger</option>
               <option value="D">Driver</option>
-              <option value="A">Admin</option>
             </select>
           </div>
 
