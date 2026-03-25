@@ -7,9 +7,7 @@ export default function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, user, success } = useSelector(
-    (state) => state.auth
-  );
+  const { loading, error, user, success } = useSelector((state) => state.auth);
 
   const [form, setForm] = useState({
     username: "",
@@ -39,11 +37,20 @@ export default function Register() {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (success) {
+      setForm({
+        username: "",
+        email: "",
+        password: "",
+        role: "P",
+      });
+    }
+  }, [success]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-600 px-4">
-      
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
           Create Account 🚀
         </h2>
@@ -55,9 +62,7 @@ export default function Register() {
         {/* ERROR */}
         {error && (
           <div className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm text-center">
-            {typeof error === "string"
-              ? error
-              : "Registration failed"}
+            {typeof error === "string" ? error : "Registration failed"}
           </div>
         )}
 
@@ -69,7 +74,6 @@ export default function Register() {
         )}
 
         <form onSubmit={handleSubmit}>
-          
           {/* Username */}
           <div className="mb-4">
             <label className="block text-gray-600 mb-1">Username</label>
