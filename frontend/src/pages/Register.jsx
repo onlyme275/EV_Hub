@@ -148,7 +148,7 @@ export default function Register() {
             onClick={() => navigate("/login")}
             className="text-green-600 cursor-pointer hover:underline"
           >
-            Login
+            Loginn
           </span>
         </p>
       </div>
