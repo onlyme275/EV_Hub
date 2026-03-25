@@ -2,6 +2,8 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/slice/authSlice";
 import { useNavigate } from "react-router-dom";
+import Info from "../components/info/Info";
+import Vechicle from "../components/vechicle/Vechicle";
 
 export default function PassengerDashboard() {
   const dispatch = useDispatch();

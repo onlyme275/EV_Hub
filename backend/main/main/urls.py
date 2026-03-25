@@ -22,6 +22,8 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('auths.urls')),
+    path('api/', include('vechicle.urls')),
+    path('api/', include('chargingstation.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)   
 
 

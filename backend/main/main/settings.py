@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "corsheaders",
 
     'auths',
+    'vechicle',
+    'chargingstation',
 
 ]
 
