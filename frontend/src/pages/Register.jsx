@@ -1,124 +1,165 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../services/api';
-import { useAuth } from '../App';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser, resetAuthState } from "../store/slice/authSlice";
+import { useNavigate } from "react-router-dom";
 
-function Register() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+export default function Register() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const { loading, error, user, success } = useSelector(
+    (state) => state.auth
+  );
 
-    try {
-      const response = await auth.register(formData);
-      login(response.data.user, response.data.token);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    role: "P",
+  });
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!form.username || !form.email || !form.password) return;
+
+    dispatch(registerUser(form));
+  };
+
+  /* ================= REDIRECT AFTER REGISTER ================= */
+  useEffect(() => {
+    if (success && user) {
+      // redirect based on role
+      if (user.role === "A") navigate("/admin");
+      if (user.role === "P") navigate("/passenger");
+      if (user.role === "D") navigate("/driver");
+    }
+  }, [success, user, navigate]);
+
+  /* ================= CLEAR STATE ON UNMOUNT ================= */
+  useEffect(() => {
+    return () => {
+      dispatch(resetAuthState());
+    };
+  }, [dispatch]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary-600">EV Hub</h1>
-          <p className="text-gray-600 mt-2">Nepal's EV Platform</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-600 px-4">
+      
+      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+          Create Account 🚀
+        </h2>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Create Account</h2>
+        <p className="text-center text-gray-500 mb-6">
+          Register to get your QR ID
+        </p>
+
+        {/* ERROR */}
+        {error && (
+          <div className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm text-center">
+            {typeof error === "string"
+              ? error
+              : "Registration failed"}
+          </div>
+        )}
+
+        {/* SUCCESS */}
+        {success && (
+          <div className="bg-green-100 text-green-600 p-3 rounded mb-4 text-sm text-center">
+            Registration successful 🎉
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
           
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
-              {error}
-            </div>
-          )}
+          {/* Username */}
+          <div className="mb-4">
+            <label className="block text-gray-600 mb-1">Username</label>
+            <input
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              placeholder="Enter username"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
+            />
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-gray-600 mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter email"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
+          {/* Password */}
+          <div className="mb-4">
+            <label className="block text-gray-600 mb-1">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Enter password"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium transition-colors disabled:opacity-50"
+          {/* Role */}
+          <div className="mb-6">
+            <label className="block text-gray-600 mb-1">Role</label>
+            <select
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-400"
             >
-              {loading ? 'Creating Account...' : 'Register'}
-            </button>
-          </form>
+              <option value="P">Passenger</option>
+              <option value="D">Driver</option>
+              <option value="A">Admin</option>
+            </select>
+          </div>
 
-          <p className="mt-6 text-center text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-              Login
-            </Link>
-          </p>
-        </div>
+          {/* Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-2 rounded-lg text-white transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
+          >
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <p className="text-center text-gray-500 text-sm mt-6">
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            className="text-green-600 cursor-pointer hover:underline"
+          >
+            Login
+          </span>
+        </p>
       </div>
     </div>
   );
 }
-
-export default Register;
